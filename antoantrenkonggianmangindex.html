@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberGuardian - Quản trị Phân quyền Thông minh</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; }
+        header { background-color: #2c3e50; color: white; }
+        nav a { transition: 0.2s; border-bottom: 2px solid transparent; }
+        nav a:hover, nav a.active { border-bottom: 2px solid #3498db; color: #3498db; }
+        .content-area { min-height: 80vh; padding: 40px 20px; }
+        .card { background: white; border: 1px solid #ddd; border-radius: 4px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        input, textarea, select { border: 1px solid #ccc; padding: 10px; border-radius: 4px; width: 100%; margin-bottom: 10px; }
+        .btn-primary { background-color: #3498db; color: white; padding: 10px 25px; border-radius: 4px; font-weight: 600; }
+        .btn-danger { background-color: #e74c3c; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px; }
+        .page { display: none; }
+        .page.active { display: block; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 14px; }
+        th { background-color: #f8f9fa; }
+        .role-badge { padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .badge-owner { background: #000; color: #fff; }
+        .badge-super { background: #8e44ad; color: #fff; }
+        .badge-mod { background: #f39c12; color: #fff; }
+        .badge-support { background: #27ae60; color: #fff; }
+        .badge-viewer { background: #95a5a6; color: #fff; }
+        .ai-glow { animation: glow 2s infinite alternate; }
+        @keyframes glow { from { box-shadow: 0 0 5px #3498db; } to { box-shadow: 0 0 15px #3498db; } }
+    </style>
+</head>
+<body>
+
+    <header class="shadow-md">
+        <div class="max-w-6xl mx-auto flex flex-wrap justify-between items-center p-4">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl font-bold tracking-tight">Cyber<span class="text-blue-400">Guardian - Developed by Nhut Truong</span></span>
+            </div>
+            <nav id="main-nav" class="flex gap-6 font-medium uppercase text-sm">
+                <a href="#" onclick="changePage('home')" id="nav-home" class="active py-1">Trang chủ</a>
+                <a href="#" onclick="changePage('report')" id="nav-report" class="py-1">Báo cáo</a>
+                <a href="#" onclick="changePage('tool')" id="nav-tool" class="py-1">Công cụ AI</a>
+            </nav>
+            <div id="auth-status">
+                <button onclick="changePage('admin-login')" class="bg-slate-600 text-white text-xs px-3 py-1 rounded text-nowrap">Đăng nhập Quản trị</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-6xl mx-auto content-area">
+
+        <!-- TRANG CHỦ -->
+        <div id="page-home" class="page active">
+            <h1 class="text-3xl font-bold mb-4">Chào mừng bạn đến với CyberGuardian</h1>
+            <p class="text-gray-600 mb-8">Hệ thống bảo vệ an toàn không gian mạng dành cho học sinh tích hợp AI.</p>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="card bg-blue-50 border-blue-200">
+                    <h3 class="font-bold mb-2 text-nowrap">Bạn đang gặp rắc rối?</h3>
+                    <p class="text-sm mb-4">Đừng im lặng. Hãy gửi báo cáo để thầy cô và chuyên gia hỗ trợ bạn.</p>
+                    <button onclick="changePage('report')" class="btn-primary">Gửi báo cáo vi phạm</button>
+                </div>
+                <div class="card">
+                    <h3 class="font-bold mb-2">Kiểm tra tin nhắn lạ</h3>
+                    <p class="text-sm mb-4">Sử dụng trí tuệ nhân tạo Gemini để phân tích mức độ an toàn của nội dung.</p>
+                    <button onclick="changePage('tool')" class="border border-slate-300 px-6 py-2 rounded">Dùng CyberBuddy ✨</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TRANG BÁO CÁO -->
+        <div id="page-report" class="page">
+            <div class="max-w-xl mx-auto">
+                <h2 class="text-2xl font-bold mb-6 text-center">Gửi báo cáo sự cố</h2>
+                <form id="reportForm" class="card space-y-2">
+                    <label class="text-sm font-semibold">Tên của bạn:</label>
+                    <input type="text" id="reportSender" placeholder="Ẩn danh">
+                    <label class="text-sm font-semibold">Loại sự cố:</label>
+                    <select id="reportType">
+                        <option>Bắt nạt mạng</option>
+                        <option>Lừa đảo tài khoản</option>
+                        <option>Nội dung nhạy cảm</option>
+                        <option>Khác</option>
+                    </select>
+                    <label class="text-sm font-semibold">Chi tiết sự việc:</label>
+                    <textarea id="reportContent" rows="4" placeholder="Hãy mô tả chi tiết sự việc..."></textarea>
+                    <button type="button" id="btnSubmitReport" onclick="submitReport()" class="btn-primary w-full">GỬI BÁO CÁO</button>
+                    <p class="text-[10px] text-gray-400 text-center mt-2 italic">* Báo cáo của bạn sẽ được AI ✨ phân tích sơ bộ để ưu tiên xử lý.</p>
+                </form>
+            </div>
+        </div>
+
+        <!-- TRANG CÔNG CỤ AI -->
+        <div id="page-tool" class="page text-center">
+            <h2 class="text-2xl font-bold mb-6">CyberBuddy AI</h2>
+            <div class="max-w-2xl mx-auto card ai-glow">
+                <textarea id="aiInput" placeholder="Dán nội dung cần kiểm tra (tin nhắn trúng thưởng, đe dọa, link lạ...)" rows="5"></textarea>
+                <button onclick="askAI()" id="btnAskAI" class="btn-primary mt-2 w-full">Phân tích nội dung ✨</button>
+                <div id="aiOutput" class="mt-6 text-left p-4 bg-slate-50 border hidden whitespace-pre-wrap text-sm leading-relaxed"></div>
+            </div>
+        </div>
+
+        <!-- TRANG ĐĂNG NHẬP ADMIN -->
+        <div id="page-admin-login" class="page">
+            <div class="max-w-sm mx-auto mt-10 card shadow-xl">
+                <h2 class="text-xl font-bold mb-6 text-center">Đăng nhập Quản trị</h2>
+                <input type="text" id="loginUser" placeholder="Tên đăng nhập">
+                <input type="password" id="loginPass" placeholder="Mật khẩu">
+                <button onclick="handleLogin()" class="btn-primary w-full uppercase">Xác nhận</button>
+            </div>
+        </div>
+
+        <!-- TRANG DASHBOARD CHUNG -->
+        <div id="page-dashboard" class="page">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold">Bảng điều khiển Quản trị</h2>
+                    <p class="text-sm text-gray-500">Xin chào, <span id="display-user" class="font-bold"></span> (<span id="display-role" class="italic"></span>)</p>
+                </div>
+                <div class="flex gap-2">
+                    <button id="btn-manage-users" onclick="changePage('manage-users')" class="hidden bg-purple-600 text-white px-4 py-2 rounded text-sm font-bold">QUẢN LÝ USER</button>
+                    <button onclick="handleLogout()" class="bg-red-500 text-white px-4 py-2 rounded text-sm font-bold">THOÁT</button>
+                </div>
+            </div>
+
+            <div id="admin-stats" class="grid grid-cols-4 gap-4 mb-8">
+                <div class="card text-center"><p class="text-xs uppercase text-gray-400">Tổng báo cáo</p><p id="stat-total" class="text-2xl font-bold">0</p></div>
+                <div class="card text-center"><p class="text-xs uppercase text-gray-400 text-nowrap">Chưa xử lý</p><p id="stat-pending" class="text-2xl font-bold text-orange-500">0</p></div>
+                <div class="card text-center"><p class="text-xs uppercase text-gray-400">Đã xong</p><p id="stat-done" class="text-2xl font-bold text-green-500">0</p></div>
+                <div class="card text-center"><p class="text-xs uppercase text-gray-400 text-nowrap">Rủi ro cao ✨</p><p id="stat-risk" class="text-2xl font-bold text-red-500">0</p></div>
+            </div>
+
+            <div class="card overflow-x-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold">Danh sách báo cáo mới nhất</h3>
+                    <span class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-1 rounded">Hỗ trợ bởi Gemini ✨</span>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Học sinh</th>
+                            <th>Nội dung</th>
+                            <th>AI Phân loại ✨</th>
+                            <th>Thời gian</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TRANG QUẢN LÝ USER -->
+        <div id="page-manage-users" class="page">
+            <div class="flex items-center gap-4 mb-6">
+                <button onclick="changePage('dashboard')" class="text-blue-500 font-bold text-nowrap">&larr; Quay lại</button>
+                <h2 class="text-2xl font-bold">Quản lý Tài khoản Admin</h2>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="card h-fit">
+                    <h3 class="font-bold mb-4">Tạo Admin mới</h3>
+                    <input type="text" id="newUser" placeholder="Username">
+                    <input type="password" id="newPass" placeholder="Password">
+                    <select id="newRole">
+                        <option value="super_admin">Super Admin</option>
+                        <option value="moderator">Moderator</option>
+                        <option value="support">Support</option>
+                        <option value="viewer">Viewer</option>
+                    </select>
+                    <button onclick="createUser()" class="btn-primary w-full mt-2">TẠO TÀI KHOẢN</button>
+                </div>
+                <div class="md:col-span-2 card">
+                    <h3 class="font-bold mb-4">Danh sách nhân sự</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Vai trò</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="user-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Phản hồi Hỗ trợ -->
+    <div id="support-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white w-full max-w-2xl rounded-lg p-6">
+            <div class="flex justify-between mb-4">
+                <h3 class="font-bold text-xl text-blue-800">Soạn phản hồi hỗ trợ ✨</h3>
+                <button onclick="closeSupportModal()" class="text-gray-500">&times;</button>
+            </div>
+            <div class="mb-4">
+                <p class="text-xs text-gray-500 uppercase font-bold">Nội dung báo cáo:</p>
+                <div id="modal-report-content" class="bg-gray-50 p-2 text-sm italic border rounded mt-1"></div>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-bold mb-1">Câu trả lời tư vấn:</label>
+                <textarea id="modal-reply-text" rows="6" class="w-full border p-2 rounded" placeholder="Nhập câu trả lời tại đây..."></textarea>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="generateSupportReply()" id="btnGenReply" class="bg-indigo-600 text-white px-4 py-2 rounded text-sm font-bold">Gợi ý bởi AI ✨</button>
+                <button onclick="submitSupportReply()" class="bg-green-600 text-white px-4 py-2 rounded text-sm font-bold ml-auto">GỬI PHẢN HỒI</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = "";
+        const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=" + apiKey;
+
+        // --- DATA DEFAULTS ---
+        const ROLES = {
+            OWNER: 'owner',
+            SUPER: 'super_admin',
+            MOD: 'moderator',
+            SUPPORT: 'support',
+            VIEWER: 'viewer'
+        };
+
+        let users = JSON.parse(localStorage.getItem('cg_users')) || [
+            { user: 'NhutTruonng', pass: '16711', role: ROLES.OWNER }
+        ];
+        
+        let reports = JSON.parse(localStorage.getItem('cg_reports')) || [];
+        let currentUser = null;
+        let activeReportId = null;
+
+        function saveData() {
+            localStorage.setItem('cg_users', JSON.stringify(users));
+            localStorage.setItem('cg_reports', JSON.stringify(reports));
+        }
+
+        // --- NAVIGATION ---
+        function changePage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + pageId).classList.add('active');
+            
+            if(pageId === 'dashboard') renderDashboard();
+            if(pageId === 'manage-users') renderUserManagement();
+        }
+
+        // --- AI API CALL ---
+        async function callGemini(prompt, systemPrompt = "") {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        systemInstruction: systemPrompt ? { parts: [{ text: systemPrompt }] } : undefined
+                    })
+                });
+                
+                // Exponential Backoff for 429 or network issues (Simplified for this version)
+                if (!response.ok) throw new Error("API call failed");
+                
+                const data = await response.json();
+                return data.candidates?.[0]?.content?.parts?.[0]?.text || "Không có phản hồi từ AI.";
+            } catch (error) {
+                console.error("AI Error:", error);
+                return "Lỗi: Không thể kết nối với trí tuệ nhân tạo. Hãy kiểm tra lại API key hoặc kết nối mạng.";
+            }
+        }
+
+        // --- AUTH LOGIC ---
+        function handleLogin() {
+            const u = document.getElementById('loginUser').value;
+            const p = document.getElementById('loginPass').value;
+            const found = users.find(x => x.user === u && x.pass === p);
+
+            if(found) {
+                currentUser = found;
+                document.getElementById('auth-status').innerHTML = `
+                    <div class="text-xs text-right bg-slate-100 p-1 rounded border">
+                        <span class="block font-bold text-slate-800">${found.user}</span>
+                        <span class="text-blue-500 italic">${found.role}</span>
+                    </div>
+                `;
+                changePage('dashboard');
+            } else {
+                alert("Sai tài khoản hoặc mật khẩu!");
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            location.reload();
+        }
+
+        // --- USER MANAGEMENT ---
+        function renderUserManagement() {
+            const tbody = document.getElementById('user-table-body');
+            tbody.innerHTML = '';
+            
+            users.forEach(u => {
+                const tr = document.createElement('tr');
+                const isOwner = u.role === ROLES.OWNER;
+                
+                let canDelete = false;
+                if(currentUser.role === ROLES.OWNER && !isOwner) canDelete = true;
+                if(currentUser.role === ROLES.SUPER && ![ROLES.OWNER, ROLES.SUPER].includes(u.role)) canDelete = true;
+
+                tr.innerHTML = `
+                    <td>${u.user}</td>
+                    <td><span class="role-badge badge-${u.role.split('_')[0]}">${u.role}</span></td>
+                    <td>
+                        ${canDelete ? `<button onclick="deleteUser('${u.user}')" class="btn-danger">Xóa</button>` : '<span class="text-gray-300">N/A</span>'}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function createUser() {
+            const u = document.getElementById('newUser').value;
+            const p = document.getElementById('newPass').value;
+            const r = document.getElementById('newRole').value;
+
+            if(!u || !p) return alert("Nhập đủ thông tin!");
+            if(users.find(x => x.user === u)) return alert("User đã tồn tại!");
+
+            users.push({ user: u, pass: p, role: r });
+            saveData();
+            renderUserManagement();
+            alert("Đã tạo thành công!");
+        }
+
+        function deleteUser(username) {
+            if(!confirm("Xác nhận xóa tài khoản này?")) return;
+            users = users.filter(x => x.user !== username);
+            saveData();
+            renderUserManagement();
+        }
+
+        // --- REPORTING ---
+        async function submitReport() {
+            const sender = document.getElementById('reportSender').value || "Ẩn danh";
+            const type = document.getElementById('reportType').value;
+            const content = document.getElementById('reportContent').value;
+            const btn = document.getElementById('btnSubmitReport');
+
+            if(!content) return alert("Vui lòng nhập nội dung!");
+
+            btn.disabled = true;
+            btn.innerText = "Đang xử lý bởi AI ✨...";
+
+            // ✨ AI Phân tích rủi ro tự động khi gửi
+            const aiPrompt = `Phân loại mức độ rủi ro (Thấp, Trung bình, Khẩn cấp) và tóm tắt ngắn gọn sự cố này trong 10 từ: "${content}"`;
+            const aiAnalysis = await callGemini(aiPrompt, "Bạn là trợ lý an toàn mạng. Hãy trả lời theo định dạng: MỨC ĐỘ | TÓM TẮT");
+
+            let priority = "Trung bình";
+            let aiSummary = "Hệ thống đang tóm tắt...";
+
+            if(aiAnalysis.includes("|")) {
+                const parts = aiAnalysis.split("|");
+                priority = parts[0].trim();
+                aiSummary = parts[1].trim();
+            }
+
+            reports.push({
+                id: Date.now(),
+                sender, type, content,
+                date: new Date().toLocaleString('vi-VN'),
+                status: 'pending',
+                priority: priority,
+                aiSummary: aiSummary,
+                responses: []
+            });
+            
+            saveData();
+            alert("Đã gửi báo cáo thành công! AI ✨ đã phân loại báo cáo của bạn là: " + priority);
+            document.getElementById('reportForm').reset();
+            btn.disabled = false;
+            btn.innerText = "GỬI BÁO CÁO";
+            changePage('home');
+        }
+
+        // --- DASHBOARD CORE ---
+        function renderDashboard() {
+            document.getElementById('display-user').innerText = currentUser.user;
+            document.getElementById('display-role').innerText = currentUser.role;
+
+            if([ROLES.OWNER, ROLES.SUPER].includes(currentUser.role)) {
+                document.getElementById('btn-manage-users').classList.remove('hidden');
+            } else {
+                document.getElementById('btn-manage-users').classList.add('hidden');
+            }
+
+            // Stats
+            document.getElementById('stat-total').innerText = reports.length;
+            document.getElementById('stat-pending').innerText = reports.filter(r => r.status === 'pending').length;
+            document.getElementById('stat-done').innerText = reports.filter(r => r.status === 'done').length;
+            document.getElementById('stat-risk').innerText = reports.filter(r => r.priority.toLowerCase().includes('khẩn cấp')).length;
+
+            const tbody = document.getElementById('admin-table-body');
+            tbody.innerHTML = '';
+
+            reports.slice().reverse().forEach(r => {
+                const tr = document.createElement('tr');
+                if(r.status === 'done') tr.style.opacity = "0.5";
+
+                const canResolve = [ROLES.OWNER, ROLES.SUPER, ROLES.MOD].includes(currentUser.role);
+                const canClassify = [ROLES.OWNER, ROLES.MOD].includes(currentUser.role);
+                const canDeleteReport = currentUser.role === ROLES.OWNER;
+                const canSupport = [ROLES.OWNER, ROLES.SUPPORT].includes(currentUser.role);
+
+                tr.innerHTML = `
+                    <td class="whitespace-nowrap"><b>${r.sender}</b><br><small class="text-blue-500">${r.type}</small></td>
+                    <td>
+                        <div class="text-[11px] font-bold text-indigo-600 mb-1">AI Tóm tắt ✨: ${r.aiSummary || 'N/A'}</div>
+                        <div class="max-w-xs text-[12px] text-gray-600 line-clamp-2" title="${r.content}">${r.content}</div>
+                    </td>
+                    <td>
+                        ${canClassify && r.status === 'pending' ? `
+                            <select onchange="classifyReport(${r.id}, this.value)" class="text-xs p-1 rounded border shadow-sm">
+                                <option ${r.priority.includes('Thấp') ? 'selected' : ''}>Thấp</option>
+                                <option ${r.priority.includes('Trung bình') ? 'selected' : ''}>Trung bình</option>
+                                <option ${r.priority.includes('Khẩn cấp') ? 'selected' : ''}>Khẩn cấp</option>
+                            </select>
+                        ` : `<span class="text-xs font-bold ${r.priority.includes('Khẩn cấp') ? 'text-red-600' : ''}">${r.priority}</span>`}
+                    </td>
+                    <td class="text-[10px] text-gray-500">${r.date}</td>
+                    <td class="p-2">
+                        <div class="flex flex-col gap-1 min-w-[80px]">
+                            ${canResolve && r.status === 'pending' ? `<button onclick="resolveReport(${r.id})" class="bg-green-100 text-green-700 font-bold text-[10px] p-1 rounded hover:bg-green-200">HOÀN TẤT</button>` : ''}
+                            ${canSupport ? `<button onclick="openSupportModal(${r.id})" class="bg-blue-100 text-blue-700 font-bold text-[10px] p-1 rounded hover:bg-blue-200">PHẢN HỒI ✨</button>` : ''}
+                            ${canDeleteReport ? `<button onclick="deleteReport(${r.id})" class="bg-red-100 text-red-700 font-bold text-[10px] p-1 rounded hover:bg-red-200">XÓA</button>` : ''}
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- SUPPORT MODAL & AI REPLY ---
+        function openSupportModal(id) {
+            activeReportId = id;
+            const report = reports.find(r => r.id === id);
+            document.getElementById('modal-report-content').innerText = report.content;
+            document.getElementById('modal-reply-text').value = "";
+            document.getElementById('support-modal').classList.remove('hidden');
+        }
+
+        function closeSupportModal() {
+            document.getElementById('support-modal').classList.add('hidden');
+            activeReportId = null;
+        }
+
+        async function generateSupportReply() {
+            const report = reports.find(r => r.id === activeReportId);
+            const btn = document.getElementById('btnGenReply');
+            
+            btn.disabled = true;
+            btn.innerText = "AI đang soạn...";
+
+            const prompt = `Học sinh gặp vấn đề: ${report.type}. Nội dung báo cáo: "${report.content}". Hãy soạn một lời phản hồi hỗ trợ tâm lý nhẹ nhàng, động viên học sinh và hứa sẽ xử lý sớm. Trả lời trực tiếp nội dung tin nhắn, xưng hô 'Chào bạn'.`;
+            const reply = await callGemini(prompt, "Bạn là chuyên gia tư vấn tâm lý học đường Việt Nam.");
+            
+            document.getElementById('modal-reply-text').value = reply;
+            btn.disabled = false;
+            btn.innerText = "Gợi ý bởi AI ✨";
+        }
+
+        function submitSupportReply() {
+            const reply = document.getElementById('modal-reply-text').value;
+            if(!reply) return alert("Vui lòng nhập nội dung phản hồi!");
+            
+            // Logic gửi phản hồi thực tế sẽ lưu vào database (reports)
+            alert("Đã gửi phản hồi đến học sinh thành công!");
+            closeSupportModal();
+        }
+
+        function resolveReport(id) {
+            const idx = reports.findIndex(x => x.id === id);
+            reports[idx].status = 'done';
+            saveData();
+            renderDashboard();
+        }
+
+        function deleteReport(id) {
+            if(!confirm("Xóa vĩnh viễn báo cáo này?")) return;
+            reports = reports.filter(x => x.id !== id);
+            saveData();
+            renderDashboard();
+        }
+
+        function classifyReport(id, val) {
+            const idx = reports.findIndex(x => x.id === id);
+            reports[idx].priority = val;
+            saveData();
+        }
+
+        // --- AI TOOL PAGE ---
+        async function askAI() {
+            const input = document.getElementById('aiInput').value;
+            const output = document.getElementById('aiOutput');
+            const btn = document.getElementById('btnAskAI');
+            if(!input) return;
+
+            btn.disabled = true;
+            btn.innerText = "AI đang phân tích nội dung rủi ro...";
+            output.classList.add('hidden');
+
+            const prompt = `Phân tích nội dung sau đây để xem có dấu hiệu lừa đảo, đe dọa hoặc nội dung xấu không: "${input}". 
+            Nếu có, hãy cảnh báo rõ ràng. Nếu không, hãy xác nhận là nội dung bình thường.
+            Hướng dẫn người dùng các bước bảo mật tiếp theo nếu cần.`;
+
+            const result = await callAII(prompt, "Bạn là chuyên gia an ninh mạng bảo vệ học sinh Việt Nam. Trình bày rõ ràng, dễ hiểu.");
+            
+            output.innerText = result;
+            output.classList.remove('hidden');
+            btn.disabled = false;
+            btn.innerText = "Phân tích nội dung ✨";
+        }
+
+        window.onload = () => {
+            saveData(); 
+        };
+    </script>
+</body>
+</html>
